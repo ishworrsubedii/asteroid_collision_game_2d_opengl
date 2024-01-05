@@ -1,4 +1,5 @@
 #include <GL/glut.h>
+#include <cmath>
 
 
 
@@ -40,15 +41,14 @@ void drawWall() {
         }
     }
 }
-
 void drawGrass() {
     float grassWidth = 0.11f;
-    float grassHeight = 0.04f;
+    float grassHeight = 0.01f; // Decreased from 0.04f to 0.02f
     int numGrassX = 20;
-    int numGrassY = 5;
+    int numGrassY = 5; // Decreased from 5 to 3
 
     float startX = -0.5f + (1.0f - numGrassX * grassWidth) / 2;
-    float startY = -1.0f + numGrassY * grassHeight;
+    float startY = -0.85f + numGrassY * grassHeight;
 
     for (int i = 0; i < numGrassY; i++) {
         for (int j = 0; j < numGrassX; j++) {
@@ -67,11 +67,9 @@ void drawGrass() {
     }
 }
 
-
-
 float rectangleX = 0.0f;
 float rectangleY = 0.0f;
-float rectangleSize = 0.1f;
+float rectangleSize = 0.05f;
 
 void drawRectangle() {
     glColor3f(1.0f, 1.0f, 1.0f); // Rectangle color
@@ -83,27 +81,34 @@ void drawRectangle() {
     glVertex2f(rectangleX, rectangleY + rectangleSize);
     glEnd();
 }
-
 void handleKeyPress(unsigned char key, int x, int y) {
-    float moveDistance = 0.1f;
+    float moveDistance = 0.11f;
+    float screenWidth = 2.0f; // Assuming the screen size is 2.0 units
 
     switch (key) {
         case 'w':
             rectangleY += moveDistance;
             break;
         case 'a':
-            rectangleX -= moveDistance;
+            if (rectangleX - moveDistance >= -screenWidth / 2) {
+                rectangleX -= moveDistance;
+            }
             break;
         case 's':
-            rectangleY -= moveDistance;
+            if (rectangleY - moveDistance >= -0.85f) {
+                rectangleY -= moveDistance;
+            }
             break;
         case 'd':
-            rectangleX += moveDistance;
+            if (rectangleX + rectangleSize + moveDistance <= screenWidth / 2) {
+                rectangleX += moveDistance;
+            }
             break;
     }
 
     glutPostRedisplay();
 }
+
 
 void display() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -123,7 +128,7 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(1080, 800);
     glutInitWindowPosition(100, 100);
-    glutCreateWindow("OpenGL - Drawing primitives");
+    glutCreateWindow("Monkey Clever Banana Flavour");
     glutDisplayFunc(display);
     glutKeyboardFunc(handleKeyPress); // Register the keyboard callback function
     glutMainLoop();
