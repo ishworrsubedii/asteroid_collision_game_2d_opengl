@@ -1,13 +1,43 @@
 #include <GL/glut.h>
 #include <cmath>
+#include <string>
+#include <vector>
+#include <cstdlib>
 
+struct Circle {
+    float x, y, radius;
+    bool active;
+};
 
+float backgroundOffsetY = 0.0f;
+float rectangleX = 0.0f, rectangleY = 0.0f, rectangleSize = 0.05f;
+int score = 0;
+const int numCircles = 10;
+
+std::vector<Circle> circles(numCircles);
+
+void drawCircle(float x, float y, float radius) {
+    glBegin(GL_POLYGON);
+    for (int i = 0; i < 360; i++) {
+        float degInRad = i * 3.14159 / 180;
+        glVertex2f(x + cos(degInRad) * radius, y + sin(degInRad) * radius);
+    }
+    glEnd();
+}
+
+void drawRectangle() {
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glBegin(GL_QUADS);
+    glVertex2f(rectangleX, rectangleY);
+    glVertex2f(rectangleX + rectangleSize, rectangleY);
+    glVertex2f(rectangleX + rectangleSize, rectangleY + rectangleSize);
+    glVertex2f(rectangleX, rectangleY + rectangleSize);
+    glEnd();
+}
 
 void drawWall() {
-    float brickWidth = 0.11f;
-    float brickHeight = 0.04f;
-    int numBricksX = 20;
-    int numBricksY = 5;
+    float brickWidth = 0.11f, brickHeight = 0.04f;
+    int numBricksX = 20, numBricksY = 5;
 
     float startX = -0.5f + (1.0f - numBricksX * brickWidth) / 2;
     float startY = -1.0f;
@@ -17,12 +47,7 @@ void drawWall() {
             float x = startX + j * brickWidth;
             float y = startY + i * brickHeight;
 
-            if ((i + j) % 2 == 0) {
-                glColor3f(0.8f, 0.4f, 0.2f); // Brick color
-            } else {
-                glColor3f(0.6f, 0.3f, 0.1f); // Brick color (alternate)
-            }
-
+            glColor3f((i + j) % 2 == 0 ? 0.8f : 0.6f, 0.4f, 0.2f);
             glBegin(GL_QUADS);
             glVertex2f(x, y);
             glVertex2f(x + brickWidth, y);
@@ -30,8 +55,7 @@ void drawWall() {
             glVertex2f(x, y + brickHeight);
             glEnd();
 
-            glColor3f(0.0f, 0.0f, 0.0f); // Line color
-
+            glColor3f(0.0f, 0.0f, 0.0f);
             glBegin(GL_LINE_LOOP);
             glVertex2f(x, y);
             glVertex2f(x + brickWidth, y);
@@ -41,11 +65,10 @@ void drawWall() {
         }
     }
 }
+
 void drawGrass() {
-    float grassWidth = 0.11f;
-    float grassHeight = 0.01f; // Decreased from 0.04f to 0.02f
-    int numGrassX = 20;
-    int numGrassY = 5; // Decreased from 5 to 3
+    float grassWidth = 0.11f, grassHeight = 0.01f;
+    int numGrassX = 20, numGrassY = 5;
 
     float startX = -0.5f + (1.0f - numGrassX * grassWidth) / 2;
     float startY = -0.85f + numGrassY * grassHeight;
@@ -55,8 +78,7 @@ void drawGrass() {
             float x = startX + j * grassWidth;
             float y = startY + i * grassHeight;
 
-            glColor3f(0.0f, 0.8f, 0.0f); // Grass color
-
+            glColor3f(0.0f, 0.8f, 0.0f);
             glBegin(GL_QUADS);
             glVertex2f(x, y);
             glVertex2f(x + grassWidth, y);
@@ -67,27 +89,40 @@ void drawGrass() {
     }
 }
 
-float rectangleX = 0.0f;
-float rectangleY = 0.0f;
-float rectangleSize = 0.05f;
+void drawCircles() {
+    for (Circle& circle : circles) {
+        if (circle.active) {
+            glColor3f(1.0f, 1.0f, 1.0f);
+            drawCircle(circle.x, circle.y, circle.radius);
+            circle.y -= 0.01f;
 
-void drawRectangle() {
-    glColor3f(1.0f, 1.0f, 1.0f); // Rectangle color
-
-    glBegin(GL_QUADS);
-    glVertex2f(rectangleX, rectangleY);
-    glVertex2f(rectangleX + rectangleSize, rectangleY);
-    glVertex2f(rectangleX + rectangleSize, rectangleY + rectangleSize);
-    glVertex2f(rectangleX, rectangleY + rectangleSize);
-    glEnd();
+            if (circle.y - circle.radius <= rectangleY + rectangleSize &&
+                circle.y + circle.radius >= rectangleY &&
+                circle.x - circle.radius <= rectangleX + rectangleSize &&
+                circle.x + circle.radius >= rectangleX) {
+                circle.active = false;
+                score++;
+            }
+        }
+    }
 }
+
+void displayScore() {
+    glRasterPos2f(-0.9f, 0.9f);
+    std::string scoreText = "Score: " + std::to_string(score);
+    for (char c : scoreText) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
+    }
+}
+
 void handleKeyPress(unsigned char key, int x, int y) {
     float moveDistance = 0.11f;
-    float screenWidth = 2.0f; // Assuming the screen size is 2.0 units
+    float screenWidth = 2.1f;
 
     switch (key) {
         case 'w':
             rectangleY += moveDistance;
+            backgroundOffsetY += moveDistance;
             break;
         case 'a':
             if (rectangleX - moveDistance >= -screenWidth / 2) {
@@ -109,15 +144,24 @@ void handleKeyPress(unsigned char key, int x, int y) {
     glutPostRedisplay();
 }
 
-
 void display() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     glEnable(GL_TEXTURE_2D);
 
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glBegin(GL_QUADS);
+    glVertex2f(-0.5f, -1.0f + backgroundOffsetY);
+    glVertex2f(0.5f, -1.0f + backgroundOffsetY);
+    glVertex2f(0.5f, 1.0f + backgroundOffsetY);
+    glVertex2f(-0.5f, 1.0f + backgroundOffsetY);
+    glEnd();
+
     drawWall();
     drawRectangle();
     drawGrass();
+    drawCircles();
+    displayScore();
 
     glFlush();
     glutSwapBuffers();
@@ -128,9 +172,18 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(1080, 800);
     glutInitWindowPosition(100, 100);
-    glutCreateWindow("Monkey Clever Banana Flavour");
+
+    for (Circle& circle : circles) {
+        circle.x = (rand() % 200 - 100) / 100.0f;
+        circle.y = (rand() % 50 + 100) / 100.0f;
+        circle.radius = 0.02f;
+        circle.active = true;
+    }
+
+    glutCreateWindow("Moving Background with Rectangle");
     glutDisplayFunc(display);
-    glutKeyboardFunc(handleKeyPress); // Register the keyboard callback function
+    glutKeyboardFunc(handleKeyPress);
     glutMainLoop();
 
+    return 0;
 }
