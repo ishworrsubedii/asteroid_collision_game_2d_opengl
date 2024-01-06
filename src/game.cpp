@@ -13,10 +13,12 @@ struct Circle {
 
 // Global variables
 float backgroundOffsetY = 0.0f;
-float rectangleX = 0.0f, rectangleY = 0.0f, rectangleSize = 0.05f;
+float rectangleX = 0.0f, rectangleY = 0.0f, rectangleSize = 0.04f;
+float rectangleWidth = 0.1f, rectangleHeight = 0.04f;
 int score = 0;
 const int numCircles = 10;
 int elapsedTime = 0;
+float starRotation = 0.0f;
 
 // Vector to store circles
 std::vector<Circle> circles;
@@ -30,6 +32,50 @@ void drawCircle(float x, float y, float radius) {
         glVertex2f(x + cos(degInRad) * radius, y + sin(degInRad) * radius);
     }
     glEnd();
+
+}
+void drawText(float x, float y, const std::string& string) {
+    glRasterPos2f(x, y);
+    for (char c : string) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
+    }
+}
+
+void updateStar(int value) {
+    // Update the star rotation
+    starRotation += 1.0f;
+    if (starRotation > 360.0f) {
+        starRotation -= 360.0f;
+    }
+
+    // Redraw the scene
+    glutPostRedisplay();
+
+    // Reset the timer
+    glutTimerFunc(16, updateStar, 0);
+}
+void drawStar(float x, float y, float size) {
+    glPushMatrix(); // Save the current transformation matrix
+
+    // Translate to the star's position
+    glTranslatef(x, y, 0.0f);
+
+    // Rotate the star
+    glRotatef(starRotation, 0.0f, 0.0f, 1.0f);
+
+    // Draw the star using GL_LINES
+    glBegin(GL_LINES);
+    glColor3f(1.0f, 1.0f, 1.0f); // Set star color
+    for (int i = 0; i < 5; ++i) {
+        // Calculate the angle in radians
+        float angle = i * 2.0f * M_PI / 5.0f;
+        // Draw a line from the center to the edge of the star
+        glVertex2f(0.0f, 0.0f);
+        glVertex2f(size * cos(angle), size * sin(angle));
+    }
+    glEnd();
+
+    glPopMatrix(); // Restore the previous transformation matrix
 }
 
 // Function to draw a rectangle
@@ -38,9 +84,9 @@ void drawRectangle() {
     glBegin(GL_QUADS);
     // Draw the rectangle using four vertices
     glVertex2f(rectangleX, rectangleY);
-    glVertex2f(rectangleX + rectangleSize, rectangleY);
-    glVertex2f(rectangleX + rectangleSize, rectangleY + rectangleSize);
-    glVertex2f(rectangleX, rectangleY + rectangleSize);
+    glVertex2f(rectangleX + rectangleWidth, rectangleY);
+    glVertex2f(rectangleX + rectangleWidth, rectangleY + rectangleHeight);
+    glVertex2f(rectangleX, rectangleY + rectangleHeight);
     glEnd();
 }
 
@@ -137,7 +183,7 @@ void drawCircles() {
         if (circle.active) {
             glColor3f(1.0f, 1.0f, 1.0f); // Circle color
             drawCircle(circle.x, circle.y, circle.radius); // Draw the circle
-            circle.y -= 0.01f; // Move circle downwards
+            circle.y -= 0.007f; // Speed
 
             // Check for collision with rectangle
             if (circle.y - circle.radius <= rectangleY + rectangleSize &&
@@ -223,6 +269,14 @@ void display() {
     glVertex2f(-0.5f, 1.0f + backgroundOffsetY);
     glEnd();
     drawCircles(); // Draw circles
+    drawStar(0.0f, 0.9f, 0.01f);
+    drawStar(0.4f, 0.9f, 0.01f);
+    drawStar(-0.4f, 0.9f, 0.01f);
+    (-0.9f, -0.9f, "Made by Ishwor Subedi");
+
+    
+
+
 
     drawWall(); // Draw wall
     drawRectangle(); // Draw rectangle
