@@ -15,6 +15,7 @@ int main(int argc, char** argv) {
     glutTimerFunc(3000, generateCircle, 10); // 10 circles will be generated
     glutTimerFunc(30000, endGame, 0);
     glutTimerFunc(16, update, 0); // Start the update loop
+    glutTimerFunc(16, updateStar, 0); // Start the star rotation update loop
 
     glutKeyboardFunc(handleKeyPress);
     glutMainLoop();
