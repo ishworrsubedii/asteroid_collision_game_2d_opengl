@@ -6,13 +6,13 @@ This project is a fun and interactive game where players navigate through space 
 ## Installation
 
 ### Prerequisites
-- CMake version 3.10 or higher
-- A C++ compiler that supports C++ 14
+- CMake version 3.22.1
+- C++ (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
 
 ### Steps
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/asteroid-collision-game.git
+git clone https://github.com/ishworrsubedii/asteroid_collision_game_2d_opengl.git
 ```
 
 2. Navigate to the project directory
@@ -51,9 +51,9 @@ make
 │   ├── game.cpp
 │   ├── main.cpp
 ├── CMakeLists.txt
-├── file_structure.txt
 └── README.md
 ```
+## Demo
 
 ## Usage
 After compiling the project, you can run the game with the following command:
