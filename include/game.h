@@ -11,6 +11,11 @@ struct Circle {
     bool active;
 };
 
+struct Star {
+    float x, y, size;
+    bool active;
+};
+
 void drawCircle(float x, float y, float radius);
 void drawRectangle();
 void drawWall();
@@ -22,3 +27,5 @@ void handleKeyPress(unsigned char key, int x, int y);
 void displayScore();
 void update(int value);
 void display();
+void drawStar(float x, float y, float size); // New function for drawing a star
+void updateStar(int value);
