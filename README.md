@@ -53,7 +53,10 @@ make
 ├── CMakeLists.txt
 └── README.md
 ```
-## Demo
+## Interface(UI)
+<img src="images/astroid_collision_game_interface.png" width="540" height="540">
+
+
 
 ## Usage
 After compiling the project, you can run the game with the following command:
